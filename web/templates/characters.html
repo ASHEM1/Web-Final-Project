@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Japanese Characters Chart{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h1>Japanese Character Alphabet Matrices</h1>
+    <p>Below are the foundation matrix structures mapping the phonetic vowels side-by-side.</p>
+    
+    <div class="tables-wrapper">
+        
+        <div class="alphabet-table-container">
+            <h3>Hiragana (ひらがな)</h3>
+            <table class="alphabet-table">
+                <tbody>
+                    <tr>
+                        <td><span class="cell-jp">あ</span><span class="cell-romaji">a</span></td>
+                        <td><span class="cell-jp">い</span><span class="cell-romaji">i</span></td>
+                        <td><span class="cell-jp">う</span><span class="cell-romaji">u</span></td>
+                        <td><span class="cell-jp">え</span><span class="cell-romaji">e</span></td>
+                        <td><span class="cell-jp">お</span><span class="cell-romaji">o</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="alphabet-table-container">
+            <h3>Katakana (カタカナ)</h3>
+            <table class="alphabet-table">
+                <tbody>
+                    <tr>
+                        <td><span class="cell-jp">ア</span><span class="cell-romaji">a</span></td>
+                        <td><span class="cell-jp">イ</span><span class="cell-romaji">i</span></td>
+                        <td><span class="cell-jp">ウ</span><span class="cell-romaji">u</span></td>
+                        <td><span class="cell-jp">え</span><span class="cell-romaji">e</span></td>
+                        <td><span class="cell-jp">オ</span><span class="cell-romaji">o</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

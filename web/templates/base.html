@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Nihongo Learn{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <header class="header-banner">
+        <div class="header-container">
+            <span class="brand-title">🌸 NihongoLearn</span>
+            
+            <div class="menu-dropdown">
+                <button class="menu-trigger-btn" aria-label="Open Navigation">🌸</button>
+                <div class="menu-content">
+                    <a href="{{ url_for('index') }}">Home</a>
+                    <a href="{{ url_for('phrases') }}">Phrases</a>
+                    <a href="{{ url_for('characters') }}">Characters</a>
+                    <hr style="margin: 0; border: 0; border-top: 1px solid thistle;">
+                    {% if session.get('user') %}
+                        <a href="{{ url_for('dashboard') }}" class="nav-link-highlight">Dashboard</a>
+                        <a href="{{ url_for('profile') }}">Profile</a>
+                        <a href="{{ url_for('logout') }}">Logout</a>
+                    {% else %}
+                        <a href="{{ url_for('login_page') }}">Login</a>
+                        <a href="{{ url_for('register_page') }}">Register</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <main class="container">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+</body>
+</html>

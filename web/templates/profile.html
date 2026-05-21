@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}My Profile - NihongoLearn{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="card profile-card">
+        <div class="profile-avatar">
+            {{ session.get('user')[0] | upper }}
+        </div>
+        <h2>Student Profile Page</h2>
+        <p class="phrase-context">Welcome back to your safe learning space.</p>
+        <hr style="margin: 20px 0;">
+        
+        <div class="profile-details-box">
+            <p><strong>Username:</strong> {{ session.get('user') }}</p>
+            <p><strong>Account Type:</strong> Language Learner Student</p>
+            <p><strong>Current Status:</strong> Online</p>
+        </div>
+        
+        <a href="{{ url_for('dashboard') }}" class="btn btn-primary" style="margin-top: 20px;">Open Phrase Dictionary</a>
+    </div>
+</div>
+{% endblock %}

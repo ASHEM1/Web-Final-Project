@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card" style="text-align: center; padding: 40px 20px;">
+    <h1 style="font-size: 2.5rem; color: white;">Start Your Japanese Journey Today</h1>
+    <p style="font-size: 1.2rem; color: #555;">Explore the core structure modules below to accelerate your foreign language study.</p>
+    <div>
+        {% if not session.get('user') %}
+            <a href="{{ url_for('register_page') }}" class="btn btn-success btn-inline" style="margin-right: 10px;">Create Free Account</a>
+            <a href="{{ url_for('login_page') }}" class="btn btn-primary btn-inline">Sign In</a>
+        {% else %}
+            <a href="{{ url_for('dashboard') }}" class="btn btn-success btn-inline">Go to My Dashboard</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="homepage-features-grid">
+    <div class="feature-square">
+        <h3 style="font-size: 1.4rem;">✍️ The Writing System</h3>
+        <p style="color: #555;">Hiragana: Phonetic letters used for native Japanese words.</p>
+        <p style="color: #555;">Katakana: Phonetic letters primarilyused for foreign words.</p>
+        <p style="color: #555;">Kanji: Logographic characters representing meaning.</p>
+         <p style="color: #555;">(FYI: These are more complex and require memorization, and are based on Chinese characters)</p>
+    </div>
+    <div class="feature-square">
+        <h3 style="font-size: 1.4rem;">💬 Conversational Phrases</h3>
+        <p style="color: #555;">Japanese follows an <strong>SOV (Subject-Object-Verb)</strong> structure. For example: <em>"I apples eat."</em></p>
+        <p style="color: #555;">In this category, you'll find common expressions used in everyday conversations.</p>
+        <p style="color: #555;">You can learn to read, write, and pronounce these examples.</p>
+    </div>
+    <div class="feature-square">
+        <h3 style="font-size: 1.4rem;">📊 Live Tracking Dashboard</h3>
+        <p style="color: #555;">Registered students can customize their personal phrase dictionaries using our database.</p>
+        <p style="color: #555;">Add, edit, and delete phrases to create your own personalized learning experience.</p>
+        <p style="color: #555;">Track your progress and review your saved phrases anytime.</p>
+    </div>
+</div>
+{% endblock %}
