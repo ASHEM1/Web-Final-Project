@@ -231,6 +231,12 @@ h3 {
     margin-top: 4px;
 }
 
+.row-header {
+    background-color: #f8f9fa;
+    font-weight: bold;
+    grid-row: 2;
+}
+
 div.profile-card {
     background: powderblue;
     border-radius: 8px;
@@ -263,6 +269,80 @@ div.profile-avatar {
     margin-bottom: 15px;
 }
 
+h2 {
+    font-size: 1.5rem;
+    font-family: papyrus, fantasy;
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.chat-box-feed {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    max-height: 400px;
+    overflow-y: auto;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+}
+
+/* Fallback text if chat is empty */
+.chat-empty-text {
+    color: #666;
+    font-style: italic;
+    text-align: center;
+}
+
+/* Individual message container */
+.chat-message-item {
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed #eee;
+}
+
+.chat-username {
+    color: #0d6efd;
+}
+
+.chat-timestamp {
+    font-size: x-small;
+    color: #999;
+    margin-left: 10px;
+}
+
+.chat-text {
+    margin: 5px 0 0 0;
+    color: #333;
+    font-size: 1.05rem;
+}
+
+/* Chat Input Form Layout */
+.chat-form {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+
+/* Custom Pink Send Button */
+.chat-submit-btn {
+    background-color:steelblue;
+    color: #333;
+    border: 1px solid #ccc;
+    transition: background-color 0.3s ease;
+}
+
+.chat-submit-btn:hover {
+    background-color:lightseagreen
+}
+
+.delete-local-btn {
+    align-self: right;
+    background-color: tomato;
+    border: 1px solid #ccc;
+    color: white;
+    transition: background-color 0.3s ease;
+}
 
 .form-group { margin-bottom: 15px; }
 .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }

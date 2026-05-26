@@ -15,9 +15,21 @@
         <div class="profile-details-box">
             <p><strong>Username:</strong> {{ session.get('user') }}</p>
             <p><strong>Account Type:</strong> Language Learner </p>
+            <p><strong>Japanese Level:</strong> {{ session.get('japanese_level') }}</p>
             <p><strong>Current Status:</strong> Online</p>
+            <p><strong>Email:</strong> {{ session.get('email') }}</p>
         </div>
-        
+        <div style="margin-top: 20px;">  
+            <!-- Form for deleting the account -->
+            <form action="{{ url_for('delete_account') }}" method="POST" 
+                onsubmit="return confirm('Are you absolutely sure you want to delete your account? This will erase all your data and messages permanently.');">
+                <button type="submit" class="btn btn-danger" style="background-color: #dc3545; color: white;">
+                    Delete My Account
+                </button>
+            </form>
+        </div>
+
+        <a href="{{ url_for('logout') }}" class="btn btn-danger" style="margin-top: 20px;">Logout</a>
         <a href="{{ url_for('dashboard') }}" class="btn btn-primary" style="margin-top: 20px;">Open Phrase Dictionary</a>
     </div>
 </div>

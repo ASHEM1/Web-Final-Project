@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Global Chat - NihongoLearn{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Global Chat Room</h2>
+    <p class="phrase-context">Connect with fellow language learners around the world!</p>
+    <hr>
+    
+    {% with flash_msgs = get_flashed_messages(with_categories=true) %}
+        {% if flash_msgs %}
+            {% for category, message in flash_msgs %}
+                <div class="alert alert-{{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="chat-box-feed">
+        {% if not messages %}
+            <p class="chat-empty-text">No messages yet. Be the first to say hello!</p>
+        {% else %}
+            {% for msg in messages %}
+                <div class="chat-message-item">
+                    <strong class="chat-username">@{{ msg[0] }}</strong> 
+                    <span class="chat-timestamp">{{ msg[2] }}</span>
+                    
+                    <!-- HIER DE VERANDERING: Alleen tonen als de ingelogde gebruiker de auteur is -->
+                    {% if session['user'] == msg[0] %}
+                        <form action="{{ url_for('delete_chat') }}" method="POST" style="display: inline;">
+                            <input type="hidden" name="msg_text" value="{{ msg[1] }}">
+                            <input type="hidden" name="msg_user" value="{{ msg[0] }}">
+                            <button type="submit" class="delete-local-btn">Delete</button>
+                        </form>
+                    {% endif %}
+                    
+                    <p class="chat-text">{{ msg[1] }}</p> 
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+    
+    <form action="{{ url_for('global_chat') }}" method="POST" class="chat-form" autocomplete="off">
+        <input type="text" name="message" class="form-control chat-input" placeholder="Type your message here..." required>
+        <button type="submit" class="btn chat-submit-btn">Send 🌸</button>
+    </form>
+    
+</div>
+
+<script>
+    // Auto-scroll to the bottom of the chat feed when the page loads
+    window.onload = function() {
+        var chatFeed = document.querySelector('.chat-box-feed');
+        if (chatFeed) {
+            chatFeed.scrollTop = chatFeed.scrollHeight;
+        }
+    };
+</script>
+{% endblock %}

@@ -20,6 +20,7 @@
                     <a href="{{ url_for('characters') }}">Characters</a>
                     <hr style="margin: 0; border: 0; border-top: 1px solid thistle;">
                     {% if session.get('user') %}
+                        <a href="{{ url_for ('global_chat') }}">Global Chat</a>
                         <a href="{{ url_for('dashboard') }}" class="nav-link-highlight">Dashboard</a>
                         <a href="{{ url_for('profile') }}">Profile</a>
                         <a href="{{ url_for('logout') }}">Logout</a>
