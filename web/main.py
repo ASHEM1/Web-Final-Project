@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
-
+import secrets
 import sqlite3
 
 app = Flask(__name__)
@@ -9,7 +9,7 @@ def init_db():
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
     
-    # Phrases now has user_id to isolate records per person
+    # Phrases table stays exactly the same
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS phrases (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -20,7 +20,8 @@ def init_db():
             category TEXT
         )
     ''')
-    # profile user_id is also a foreign key to users table, so we can link profiles to accounts
+    
+    # UPDATED: Users table now includes verification and token columns
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -28,11 +29,14 @@ def init_db():
             password TEXT,
             email TEXT,
             birthdate TEXT,
-            japanese_level TEXT
+            japanese_level TEXT,
+            is_verified INTEGER DEFAULT 0,
+            reset_token TEXT,
+            token_expiry TEXT
         )
     ''')
 
-    # Global chat messages table to store all messages from all users in one place
+    # Global chat messages table stays exactly the same
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS global_messages (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -41,6 +45,36 @@ def init_db():
             timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     ''')
+
+    # Profiles table stays exactly the same
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS profiles (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            email TEXT,
+            japanese_level TEXT
+        )
+    ''')
+    
+    # --- FIX FOR EXISTING DATABASES ---
+    # If your database file already exists on your computer, CREATE TABLE won't add new columns.
+    # These lines below check if the columns exist, and add them if they are missing!
+    try:
+        cursor.execute("ALTER TABLE users ADD COLUMN is_verified INTEGER DEFAULT 0")
+    except sqlite3.OperationalError:
+        pass # Already exists!
+        
+    try:
+        cursor.execute("ALTER TABLE users ADD COLUMN reset_token TEXT")
+    except sqlite3.OperationalError:
+        pass # Already exists!
+
+    try:
+        cursor.execute("ALTER TABLE users ADD COLUMN token_expiry TEXT")
+    except sqlite3.OperationalError:
+        pass # Already exists!
+    # ----------------------------------
+
     conn.commit()
     conn.close()
 
@@ -99,23 +133,23 @@ def profile():
    
     username = session['user']
     
-    # Haal de specifieke gegevens van deze gebruiker op uit de database
+    # Fetch the user's email and Japanese level from the database using their username
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
     cursor.execute('SELECT email, japanese_level FROM users WHERE username = ?', (username,))
     user_data = cursor.fetchone()
     conn.close()
     
-    # Geef standaardwaarden mee voor het geval de databasevelden leeg zijn
+    # Set default values in case the database returns None (e.g., if email or japanese_level is NULL)
     email = "Not provided"
     japanese_level = "Not selected"
     
     if user_data:
         email = user_data[0] if user_data[0] else "Not provided"
-        # Maak het niveau netjes met een hoofdletter (bijv. 'Beginner')
+        # Capitalize the Japanese level for better display, but only if it's not None or empty
         japanese_level = user_data[1].capitalize() if user_data[1] else "Not selected"
 
-    # Stuur 'email' en 'japanese_level' als losse variabelen mee naar je template!
+    # Pass the email and japanese_level variables into the profile.html template so they can be displayed on the page
     return render_template('profile.html', email=email, japanese_level=japanese_level)
 
 
@@ -270,6 +304,110 @@ def logout():
     session.pop('user', None)
     flash('Logged out successfully.', 'success')
     return redirect(url_for('index'))
+
+from flask_mail import Mail, Message
+
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'lhermans349@gmail.com'
+app.config['MAIL_PASSWORD'] = 'qapi ztsq hatv gtdy'
+
+mail = Mail(app)
+
+@app.route('/test_email')
+def test_email():
+    try:
+        # Create a simple test message
+        msg = Message(
+            subject="Hello from Phrase Manager!",
+            sender=app.config['MAIL_USERNAME'],
+            recipients=[app.config['MAIL_USERNAME']] # This sends it right back to yourself!
+        )
+        msg.body = "Hey there! If you are reading this, your Flask-Mail setup is working perfectly."
+        
+        # Actually send it
+        mail.send(msg)
+        return "Success! Check your Gmail inbox (and maybe your spam folder just in case)."
+        
+    except Exception as e:
+        # If something breaks, it will show us the exact error message on the screen
+        return f"Something went wrong: {str(e)}"
+    
+@app.route('/update_email', methods=['POST'])
+def update_email():
+    if 'user' not in session:
+        flash('Please log in first!', 'danger')
+        return redirect(url_for('login_page'))
+        
+    new_email = request.form.get('email').strip().lower()
+    username = session['user']
+    
+    #  Generate a unique secure random token for the verification link
+    verification_token = secrets.token_urlsafe(32)
+    
+    #  Update the database: Save the email, set is_verified to 0, save the token
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+    cursor.execute('''
+        UPDATE users 
+        SET email = ?, is_verified = 0, reset_token = ? 
+        WHERE username = ?
+    ''', (new_email, verification_token, username))
+    conn.commit()
+    conn.close()
+    
+    #  Create the unique click link pointing back to your website
+    # _external=True turns it into a complete clickable web address (http://...)
+    verify_url = url_for('verify_email', token=verification_token, _external=True)
+    
+    #  Fire off the real email via Gmail!
+    try:
+        msg = Message(
+            subject="Verify Your New Email Address",
+            sender=app.config['MAIL_USERNAME'],
+            recipients=[new_email]
+        )
+        msg.body = f"Hello {username},\n\nYou requested to change or verify your email address. Please click the link below to confirm your email:\n\n{verify_url}\n\nIf you did not make this request, you can safely ignore this email."
+        
+        mail.send(msg)
+        flash('Email updated successfully! Please check your inbox to verify it.', 'success')
+    except Exception as e:
+        flash(f'Email saved, but failed to send verification message: {str(e)}', 'danger')
+        
+    return redirect(url_for('profile'))
+
+
+@app.route('/verify_email/<token>')
+def verify_email(token):
+    # Connect to your database
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+    
+    # Check if any user owns this exact security token
+    cursor.execute('SELECT username FROM users WHERE reset_token = ?', (token,))
+    user_row = cursor.fetchone()
+    
+    if user_row:
+        username = user_row[0]
+        
+        # Match found! Turn is_verified to 1 (True) and clear out the token so it can't be reused
+        cursor.execute('''
+            UPDATE users 
+            SET is_verified = 1, reset_token = NULL 
+            WHERE username = ?
+        ''', (username,))
+        conn.commit()
+        
+        flash('Success! Your email address has been verified.', 'success')
+    else:
+        # If someone modifies the token string in the URL or uses an old link
+        flash('Invalid or expired verification link.', 'danger')
+        
+    conn.close()
+    
+    # Send them back to their profile page to see the success message
+    return redirect(url_for('profile'))
 
 @app.route('/add_phrase', methods=['POST'])
 def add_phrase():

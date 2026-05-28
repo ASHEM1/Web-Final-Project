@@ -14,13 +14,22 @@
         
         <div class="profile-details-box">
             <p><strong>Username:</strong> {{ session.get('user') }}</p>
-            <p><strong>Account Type:</strong> Language Learner </p>
-            <p><strong>Japanese Level:</strong> {{ session.get('japanese_level') }}</p>
+            <p><strong>Japanese Level:</strong> {{ japanese_level }}</p>
             <p><strong>Current Status:</strong> Online</p>
-            <p><strong>Email:</strong> {{ session.get('email') }}</p>
+            
+            <form action="{{ url_for('update_email') }}" method="POST" style="margin-top: 15px; text-align: left;">
+                <label style="font-weight: bold; display: block; margin-bottom: 5px; color: #444;">Email Address:</label>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <input type="email" name="email" value="{{ email }}" required 
+                           style="padding: 8px; flex-grow: 1; border-radius: 4px; border: 1px solid #ccc; font-size: 1rem;">
+                    <button type="submit" class="btn mail-btn" style="padding: 8px 15px; cursor: pointer;" title="Save and Send Verification">
+                        💾 Save
+                    </button>
+                </div>
+            </form>
         </div>
+
         <div style="margin-top: 20px;">  
-            <!-- Form for deleting the account -->
             <form action="{{ url_for('delete_account') }}" method="POST" 
                 onsubmit="return confirm('Are you absolutely sure you want to delete your account? This will erase all your data and messages permanently.');">
                 <button type="submit" class="btn btn-danger" style="background-color: #dc3545; color: white;">

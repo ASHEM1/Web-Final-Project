@@ -42,7 +42,14 @@
             <p>This list is private and secured exclusively to your student account profile.</p>
             {% if not phrases %}
                 <p style="color: #666; font-style: italic; margin-top: 20px;">Your dictionary is empty. Use the form on the left to add your first word!</p>
+
             {% else %}
+                <div class="filter-container" style="margin: 20px 0 15px 0; text-align: right;">
+                    <label for="categoryFilter" style="font-weight: bold; margin-right: 8px; color: #444;">Filter by Category:</label>
+                    <select id="categoryFilter" class="form-control" style="display: inline-block; width: auto; padding: 5px 10px; border-radius: 4px;" onchange="filterByCategory()">
+                        <option value="all">All Categories</option>
+                    </select>
+                </div>
                 <table class="data-table">
                     <thead>
                         <tr>
@@ -53,13 +60,13 @@
                             <th>Action</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="phraseTableBody">
                         {% for phrase in phrases %}
-                        <tr>
+                        <tr data-category="{{ phrase[5] }}">
                             <td><strong>{{ phrase[2] }}</strong></td>
                             <td>{{ phrase[3] }}</td>
                             <td>{{ phrase[4] }}</td>
-                            <td><span class="category-tag">{{ phrase[5] }}</span></td>
+                            <td><span class="category-tag row-category-text">{{ phrase[5] }}</span></td>
                             <td>
                                 <a href="{{ url_for('delete_phrase', phrase_id=phrase[0]) }}" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this phrase?');">Delete</a>
                             </td>
@@ -74,26 +81,89 @@
 </div>
 
 <script>
+// RUNS AUTOMATICALLY ON PAGE LOAD: Builds your menu options out of thin air
+document.addEventListener("DOMContentLoaded", function() {
+    const filterMenu = document.getElementById('categoryFilter');
+    const categoryCells = document.querySelectorAll('.row-category-text');
+    
+    // Set up a collection to hold unique names (ignores duplicates)
+    let uniqueCategories = new Set();
+    
+    categoryCells.forEach(cell => {
+        let text = cell.textContent.trim();
+        if (text) { uniqueCategories.add(text); }
+    });
+    
+    // Loop through your custom categories and append them as options in the menu
+    uniqueCategories.forEach(category => {
+        let option = document.createElement('option');
+        option.value = category.toLowerCase().trim();
+        option.textContent = category;
+        filterMenu.appendChild(option);
+    });
+});
+
+// Hides/Shows matching categories instantly
+function filterByCategory() {
+    const selectedCategory = document.getElementById('categoryFilter').value.toLowerCase().trim();
+    const tableRows = document.querySelectorAll('#phraseTableBody tr');
+
+    tableRows.forEach(row => {
+        let rowCategory = row.getAttribute('data-category');
+        rowCategory = rowCategory ? rowCategory.toLowerCase().trim() : "";
+        
+        if (selectedCategory === 'all' || rowCategory === selectedCategory) {
+            row.style.display = ''; // Show
+        } else {
+            row.style.display = 'none'; // Hide
+        }
+    });
+}
+
 function liveTranslate() {
     const romajiInput = document.getElementById("romaji-input").value.toLowerCase();
     const jpOutput = document.getElementById("jp-input");
     
     // Core phonetic lookup dictionary mapping rules
     const dictionary = {
-        'konnichiwa': 'こんにちは',
-        'arigatou': 'ありがとう',
-        'sumimasen': 'すみません',
-        'sayounara': 'さようなら',
-        'hai': 'はい',
-        'iie': 'いいえ',
-        'a': 'あ', 'i': 'い', 'u': 'う', 'e': 'え', 'o': 'お'
+        'konnichiwa': 'こんにちは', 'chotto matte': 'ちょっと待って', 'arigatou gozaimasu': 'ありがとうございます', 
+        'arigatou': 'ありがとう', 'dakara': 'だから', 'gomen nasai': 'ごめんなさい', 'dameru': 'だめ', 'onegai shimasu': 'お願いします', 'damero': 'だめろ', 
+        'sumimasen': 'すみません', 'daijoobu': '大丈夫', 'genki desu ka': '元気ですか', 'genki': '元気', 'sayonara': 'さようなら',
+        'jaa ne': 'じゃあね', 'mata ne': 'またね', 'ohayou gozaimasu': 'おはようございます', 'konbanwa': 'こんばんは', 'baka': 'ばか', 'aho': 'あほ', 'sugoi': 'すごい',
+        'hai': 'はい', 'iie': 'いいえ', 'wakarimashita': 'わかりました', 'wakarimasen': 'わかりません', 'daijoubu': '大丈夫', 'yokatta': 'よかった', 'otsukaresama': 'お疲れ様', 'otsukare': 'お疲れ',
+        'betsu ni': '別に', 'ohayou': 'おはよう', 'oyasumi': 'おやすみ', 'demo': 'でも', 'sugoi': 'すごい', 'kawaii': 'かわいい', 'urusai': 'うるさい', 'baka': 'ばか', 'hontou': '本当',
+        'kakko ii': 'かっこいい', 'kirei': 'きれい', 'tanoshii': '楽しい', 'omoshiroi': '面白い', 'muzukashii': '難しい', 'yasashii': '優しい',
+        'domo': 'どうも', 'dou itashimashite': 'どういたしまして', 'yoroshiku onegaishimasu': 'よろしくお願いします', 'otsukaresama deshita': 'お疲れ様でした', 'ganbatte': '頑張って', 'ganbarimasu': '頑張ります',
+        'itadakimasu': 'いただきます', 'gochisousama deshita': 'ごちそうさまでした', 'gochisousama': 'ごちそうさま',
+        'kudasai': 'ください', 'chotto': 'ちょっと', 'suki': '好き', 'daisuki': '大好き', 'kirai': '嫌い', 'daikirai': '大嫌い',
+        'douzo': 'どうぞ', 'doumo': 'どうも', 'doumo arigatou': 'どうもありがとう', 'doumo sumimasen': 'どうもすみません',
+        'douko': 'どうこ', 'douka': 'どうか', 'douka onegaishimasu': 'どうかお願いします', 'douka yoroshiku': 'どうかよろしく',
+        'ganbatte': '頑張って', 'ganbarimasu': '頑張ります', 'ganbare': '頑張れ', 'ganbatte ne': '頑張ってね', 'ganbatte kudasai': '頑張ってください',
+        'hanasenai': '話せない', 'hanasemasen': '話せません', 'hanasou': '話そう', 'hanashitai': '話したい', 'hanashimasu': '話します',
+        'henda': '変だ', 'honto': '本当', 'hontou ni': '本当に', 'hontou desu ka': '本当ですか', 'hontou desu': '本当です',
+        'ii': 'いい', 'ii desu ne': 'いいですね', 'ii desu': 'いいです', 'ii koto': 'いいこと', 'ii hito': 'いい人',
+        'iiyo': 'いいよ', 'iiyou': 'いいよう', 'iiyou ni': 'いいように', 'iiyou desu': 'いいようです',
+        'nani': '何', 'nan desu ka': '何ですか', 'nan desu': '何です', 'nan no': '何の', 'nan to': '何と',
+        'nande': 'なんで', 'nandeyanen': 'なんでやねん', 'nande soko': 'なんでそこ', 'nande koko': 'なんでここ',
+        'itsuka': 'いつか', 'itsumo': 'いつも', 'itsudemo': 'いつでも', 'itsuka wa': 'いつかは', 'itsuka mata': 'いつかまた',
+        'kara': 'から', 'kara desu': 'からです', 'kara ne': 'からね', 'kara onegaishimasu': 'からお願いします',
+        'a': 'あ', 'i': 'い', 'u': 'う', 'e': 'え', 'o': 'お', 'ka': 'か', 'ki': 'き', 'ku': 'く', 'ke': 'け', 'ko': 'こ',
+        'sa': 'さ', 'shi': 'し', 'su': 'す', 'se': 'せ', 'so': 'そ', 'ta': 'た', 'chi': 'ち', 'tsu': 'つ', 'te': 'て', 'to': 'と',
+        'na': 'な', 'ni': 'に', 'nu': 'ぬ', 'ne': 'ね', 'no': 'の', 'ha': 'は', 'hi': 'ひ', 'fu': 'ふ', 'he': 'へ', 'ho': 'ほ',
+        'ma': 'ま', 'mi': 'み', 'mu': 'む', 'me': 'め', 'mo': 'も', 'ya': 'や', 'yu': 'ゆ', 'yo': 'よ', 'ra': 'ら', 'ri': 'り', 
+        'ru': 'る', 're': 'れ', 'ro': 'ろ', 'wa': 'わ', 'wo': 'を', 'n': 'ん',
+        'be': 'べ', 'pe': 'ぺ', 'ga': 'が', 'gi': 'ぎ', 'gu': 'ぐ', 'ge': 'げ', 'go': 'ご', 'za': 'ざ', 'ji': 'じ', 'zu': 'ず',
+        'ze': 'ぜ', 'zo': 'ぞ', 'da': 'だ', 'de': 'で', 'do': 'ど', 'ba': 'ば', 'pa': 'ぱ', 'gya': 'ぎゃ', 'gyu': 'ぎゅ',
+        'gyo': 'ぎょ', 'ja': 'じゃ', 'ju': 'じゅ', 'jo': 'じょ', 'bya': 'びゃ', 'byu': 'びゅ', 'byo': 'びょ', 'pya': 'ぴゃ', 'pyu': 'ぴゅ', 'pyo': 'ぴょ',
+        'bu': 'ぶ', 'pu': 'ぷ', 'kya': 'きゃ', 'kyu': 'きゅ', 'kyo': 'きょ', 'sha': 'しゃ', 'shu': 'しゅ', 'sho': 'しょ', 'cha': 'ちゃ', 'chu': 'ちゅ', 'cho': 'ちょ',
+        'nya': 'にゃ', 'nyu': 'にゅ', 'nyo': 'にょ', 'hya': 'ひゃ', 'hyu': 'ひゅ', 'hyo': 'ひょ', 'mya': 'みゃ', 'myu': 'みゅ', 'myo': 'みょ',
+        'rya': 'りゃ', 'ryu': 'ryu', 'ryo': 'りょ', 'fa': 'ふぁ', 'fi': 'ふぃ', 'fe': 'ふぇ', 'fo': 'ふぉ', 'va': 'ヴぁ', 'vi': 'ヴぃ', 've': 'ヴぇ', 'vo': 'ヴぉ',
+        'bo': 'ぼ', 'po': 'ぽ'
     };
     
-    // If the typed Romaji matches a word in our translation rules, fill it in automatically!
     if (dictionary[romajiInput]) {
         jpOutput.value = dictionary[romajiInput];
     } else {
-        // Fallback defaults to whatever they typed if it's a completely unique vocabulary word
         jpOutput.value = romajiInput;
     }
 }
