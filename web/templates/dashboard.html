@@ -126,15 +126,14 @@ function liveTranslate() {
     
     // Core phonetic lookup dictionary mapping rules
     const dictionary = {
-        'konnichiwa': 'こんにちは', 'chotto matte': 'ちょっと待って', 'arigatou gozaimasu': 'ありがとうございます', 
+        'konnichiwa': 'こんにちは', 'chotto matte': 'ちょっと待って', 'arigatou gozaimasu': 'ありがとうございます', 'anata no namae wa nan desu ka': 'あなたの名前はなんですか',
         'arigatou': 'ありがとう', 'dakara': 'だから', 'gomen nasai': 'ごめんなさい', 'dameru': 'だめ', 'onegai shimasu': 'お願いします', 'damero': 'だめろ', 
         'sumimasen': 'すみません', 'daijoobu': '大丈夫', 'genki desu ka': '元気ですか', 'genki': '元気', 'sayonara': 'さようなら',
         'jaa ne': 'じゃあね', 'mata ne': 'またね', 'ohayou gozaimasu': 'おはようございます', 'konbanwa': 'こんばんは', 'baka': 'ばか', 'aho': 'あほ', 'sugoi': 'すごい',
-        'hai': 'はい', 'iie': 'いいえ', 'wakarimashita': 'わかりました', 'wakarimasen': 'わかりません', 'daijoubu': '大丈夫', 'yokatta': 'よかった', 'otsukaresama': 'お疲れ様', 'otsukare': 'お疲れ',
-        'betsu ni': '別に', 'ohayou': 'おはよう', 'oyasumi': 'おやすみ', 'demo': 'でも', 'sugoi': 'すごい', 'kawaii': 'かわいい', 'urusai': 'うるさい', 'baka': 'ばか', 'hontou': '本当',
+        'hai': 'はい', 'iie': 'いいえ', 'wakarimashita': 'わかりました', 'wakarimasen': 'わかりません', 'daijoubu': '大丈夫', 'yokatta': 'よかった',
         'kakko ii': 'かっこいい', 'kirei': 'きれい', 'tanoshii': '楽しい', 'omoshiroi': '面白い', 'muzukashii': '難しい', 'yasashii': '優しい',
         'domo': 'どうも', 'dou itashimashite': 'どういたしまして', 'yoroshiku onegaishimasu': 'よろしくお願いします', 'otsukaresama deshita': 'お疲れ様でした', 'ganbatte': '頑張って', 'ganbarimasu': '頑張ります',
-        'itadakimasu': 'いただきます', 'gochisousama deshita': 'ごちそうさまでした', 'gochisousama': 'ごちそうさま',
+        'itadakimasu': 'いただきます', 'gochisousama deshita': 'ごちそうさまでした', 'gochisousama': 'ごちそうさま', 'doushite': 'どうして',
         'kudasai': 'ください', 'chotto': 'ちょっと', 'suki': '好き', 'daisuki': '大好き', 'kirai': '嫌い', 'daikirai': '大嫌い',
         'douzo': 'どうぞ', 'doumo': 'どうも', 'doumo arigatou': 'どうもありがとう', 'doumo sumimasen': 'どうもすみません',
         'douko': 'どうこ', 'douka': 'どうか', 'douka onegaishimasu': 'どうかお願いします', 'douka yoroshiku': 'どうかよろしく',
