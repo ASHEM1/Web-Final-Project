@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}Lesson Results{% endblock %}
+{% block content %}
+<div style="max-width: 600px; margin: 40px auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center;">
+    <h2>🎓 Lesson Summary</h2>
+    <hr>
+    
+    <div style="margin: 20px auto; width: 100px; height: 100px; border-radius: 50%; background: #e9ecef; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 3px solid #28a745;">
+        <span style="font-size: 2.5rem; font-weight: bold;">{{ grade }}</span>
+        <span style="font-size: 0.8rem; color: #555;">{{ score }}/{{ total }}</span>
+    </div>
+    
+    <div style="text-align: left; margin: 20px 0;">
+        {% for b in breakdown %}
+        <div style="padding: 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between;">
+            <div>
+                <strong>{{ b.japanese }}</strong><br>
+                <small style="color: #666;">Correct: {{ b.correct_choice }} | Selected: {{ b.user_choice }}</small>
+            </div>
+            <strong>{{ b.status }}</strong>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <a href="{{ url_for('lessons') }}" style="display: inline-block; padding: 10px 20px; background: #28a745; color: white; text-decoration: none; border-radius: 4px; font-weight: bold;">Next Lesson</a>
+    <a href="{{ url_for('profile') }}" style="display: inline-block; padding: 10px 20px; background: #6c757d; color: white; text-decoration: none; border-radius: 4px; margin-left: 10px;">Back to Profile</a>
+</div>
+{% endblock %}

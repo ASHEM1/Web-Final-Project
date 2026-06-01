@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 import secrets
 import sqlite3
+import random
 
 app = Flask(__name__)
 app.secret_key = 'my_easy_secret_key'
@@ -408,6 +409,88 @@ def verify_email(token):
     
     # Send them back to their profile page to see the success message
     return redirect(url_for('profile'))
+
+@app.route('/lessons', methods=['GET', 'POST'])
+def lessons():
+    if 'user' not in session:
+        flash('Please log in first!', 'danger')
+        return redirect(url_for('login_page'))
+        
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+    
+    #  Grab user data
+    cursor.execute('SELECT id FROM users WHERE username = ?', (session['user'],))
+    user_id = cursor.fetchone()[0]
+    
+    #  Grab all phrases to build questions and decoys
+    cursor.execute('SELECT id, japanese, romaji, english FROM phrases WHERE user_id = ?', (user_id,))
+    all_phrases = cursor.fetchall()
+    
+    if len(all_phrases) < 4:
+        conn.close()
+        flash('Add at least 4 phrases to your dictionary to generate dynamic multiple-choice options!', 'warning')
+        return redirect(url_for('dashboard'))
+
+    # IF SUBMITTING ANSWERS
+    if request.method == 'POST':
+        score = 0
+        total = int(request.form.get('total_lessons', 0))
+        breakdown = []
+        
+        for i in range(total):
+            phrase_id = request.form.get(f'phrase_id_{i}')
+            selected_answer = request.form.get(f'q_{i}')
+            
+            cursor.execute('SELECT japanese, romaji FROM phrases WHERE id = ?', (phrase_id,))
+            word_info = cursor.fetchone()
+            
+            # Simple session check or verification against actual mapping string
+            correct_choice = request.form.get(f'correct_{i}')
+            is_correct = selected_answer == correct_choice
+            if is_correct:
+                score += 1
+                
+            breakdown.append({
+                'japanese': word_info[0] if word_info else "Word",
+                'romaji': word_info[1] if word_info else "",
+                'user_choice': selected_answer,
+                'correct_choice': correct_choice,
+                'status': '✅ Correct' if is_correct else '❌ Incorrect'
+            })
+            
+        conn.close()
+        
+        # Grading
+        pct = (score / total) * 100
+        if pct >= 90: grade = 'A'
+        elif pct >= 80: grade = 'B'
+        elif pct >= 70: grade = 'C'
+        else: grade = 'F'
+        
+        return render_template('lesson_report.html', score=score, total=total, grade=grade, breakdown=breakdown)
+
+    # LOADING LESSON GENERATOR (GET)
+    # Pick 3 random phrases to turn into lesson items
+    lesson_items = random.sample(all_phrases, min(len(all_phrases), 3))
+    quiz_data = []
+    
+    for item in lesson_items:
+        correct_romaji = item[2]
+        # Build fake choices out of other database words
+        decoys = [p[2] for p in all_phrases if p[2] != correct_romaji]
+        choices = random.sample(decoys, min(len(decoys), 3)) + [correct_romaji]
+        random.shuffle(choices) # Shuffle so correct choice isn't always last
+        
+        quiz_data.append({
+            'id': item[0],
+            'japanese': item[1],
+            'choices': choices,
+            'correct': correct_romaji
+        })
+        
+    conn.close()
+    return render_template('lessons.html', quiz_data=quiz_data, enumerate=enumerate)
 
 @app.route('/add_phrase', methods=['POST'])
 def add_phrase():
