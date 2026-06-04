@@ -248,12 +248,12 @@ div.profile-card {
 div.profile-card h2 {
     margin-top: 0;
     color: #333;
-    font-family: papyrus, fantasy;
+    
 }
 
 div.profile-card p {
     margin-bottom: 10px;
-    font-family: pacifico, cursive;
+    font-family: comic sans MS;
 }
 
 div.profile-avatar {
